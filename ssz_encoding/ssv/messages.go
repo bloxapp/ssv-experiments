@@ -13,7 +13,7 @@ type PartialSignature struct {
 type SignedPartialSignatures struct {
 	ID                types.MessageID     `ssz-size:"52"`
 	PartialSignatures []*PartialSignature `ssz-max:"13"`
-	Justification     *qbft.SignedCommitMessage
+	Justification     *qbft.SignedMessageHeader
 }
 
 type SignedPartialSignatureHeader struct {

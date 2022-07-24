@@ -17,12 +17,12 @@ func TestPartialSignature_HashTreeRoot(t *testing.T) {
 			{},
 			{},
 		},
-		Justification: &qbft.SignedCommitMessage{
-			Message: &qbft.BaseMessage{
-				ID:     id,
-				Height: 1,
-				Round:  1,
-				Digest: [32]byte{},
+		Justification: &qbft.SignedMessageHeader{
+			Message: &qbft.MessageHeader{
+				ID:        id,
+				Height:    1,
+				Round:     2,
+				InputRoot: [32]byte{},
 			},
 			Signature: [96]byte{},
 			Signers:   []uint64{1},
