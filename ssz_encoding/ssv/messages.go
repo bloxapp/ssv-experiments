@@ -1,18 +1,23 @@
 package ssv
 
-import "ssv-experiments/ssz_encoding/qbft"
+import (
+	"ssv-experiments/ssz_encoding/qbft"
+	"ssv-experiments/ssz_encoding/types"
+)
 
-//go:generate go run .../fastssz/sszgen --path . --include ../qbft
+//go:generate go run .../fastssz/sszgen --path . --include ../qbft,../types
 
 type PartialSignature struct {
 }
 
 type SignedPartialSignatures struct {
+	ID                types.MessageID     `ssz-size:"52"`
 	PartialSignatures []*PartialSignature `ssz-max:"13"`
 	Justification     *qbft.SignedCommitMessage
 }
 
 type SignedPartialSignatureHeader struct {
+	ID                types.MessageID     `ssz-size:"52"`
 	PartialSignatures []*PartialSignature `ssz-max:"13"`
-	Root              [32]byte            `ssz-size:"32"`
+	JustificationRoot [32]byte            `ssz-size:"32"`
 }

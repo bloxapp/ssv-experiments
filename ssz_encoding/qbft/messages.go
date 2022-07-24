@@ -1,47 +1,38 @@
 package qbft
 
-//go:generate go run .../fastssz/sszgen --path .
+import (
+	"ssv-experiments/ssz_encoding/types"
+)
 
-type CommitMessage struct {
+//go:generate go run .../fastssz/sszgen --path . --include ../types
+
+type BaseMessage struct {
+	ID     types.MessageID `ssz-size:"52"`
 	Height uint64
 	Round  uint64
 	Digest [32]byte `ssz-size:"32"`
 }
 
 type SignedCommitMessage struct {
-	Message   *CommitMessage
+	Message   *BaseMessage
 	Signers   []uint64 `ssz-max:"13"`
 	Signature [96]byte `ssz-size:"96"`
-}
-
-type PrepareMessage struct {
-	Height uint64
-	Round  uint64
-	Digest [32]byte `ssz-size:"32"`
 }
 
 type SignedPrepareMessage struct {
-	Message   *PrepareMessage
+	Message   *BaseMessage
 	Signers   []uint64 `ssz-max:"13"`
 	Signature [96]byte `ssz-size:"96"`
 }
 
-type ProposalMessage struct {
-	Height uint64
-	Round  uint64
-	Digest [32]byte `ssz-size:"32"`
-}
-
 type SignedProposalMessage struct {
-	Message   *ProposalMessage
+	Message   *BaseMessage
 	Signers   []uint64 `ssz-max:"13"`
 	Signature [96]byte `ssz-size:"96"`
 }
 
 type RoundChangeMessage struct {
-	Height        uint64
-	Round         uint64
-	PreparedValue [32]byte `ssz-size:"32"`
+	Message       *BaseMessage
 	PreparedRound uint64
 }
 
