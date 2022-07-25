@@ -12,18 +12,19 @@ type Message struct {
 	ID     types.MessageID `ssz-size:"52"`
 	Height uint64
 	Round  uint64
-	Input  *types.ConsensusInput
+	Input  types.ConsensusInput
 	// PreparedRound an optional field used for round-change
 	PreparedRound uint64
 }
 
-func (msg *Message) ToMessageHeader() (*MessageHeader, error) {
+func (msg Message) ToMessageHeader() (MessageHeader, error) {
 	r, err := msg.Input.HashTreeRoot()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get input root")
+		return MessageHeader{}, errors.Wrap(err, "failed to get input root")
 	}
-	return &MessageHeader{
+	return MessageHeader{
 		ID:            msg.ID,
+		Height:        msg.Height,
 		Round:         msg.Round,
 		InputRoot:     r,
 		PreparedRound: msg.PreparedRound,
@@ -32,7 +33,7 @@ func (msg *Message) ToMessageHeader() (*MessageHeader, error) {
 
 // SignedMessage includes a signature over Message AND optional justification fields (not signed over)
 type SignedMessage struct {
-	Message   *Message
+	Message   Message
 	Signers   []uint64 `ssz-max:"13"`
 	Signature [96]byte `ssz-size:"96"`
 
@@ -64,7 +65,7 @@ type MessageHeader struct {
 
 // SignedMessageHeader includes a signature over MessageHeader
 type SignedMessageHeader struct {
-	Message   *MessageHeader
+	Message   MessageHeader
 	Signers   []uint64 `ssz-max:"13"`
 	Signature [96]byte `ssz-size:"96"`
 }

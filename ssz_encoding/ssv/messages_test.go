@@ -18,7 +18,7 @@ func TestPartialSignature_HashTreeRoot(t *testing.T) {
 			{},
 		},
 		Justification: &qbft.SignedMessageHeader{
-			Message: &qbft.MessageHeader{
+			Message: qbft.MessageHeader{
 				ID:        id,
 				Height:    1,
 				Round:     2,
