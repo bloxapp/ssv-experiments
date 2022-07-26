@@ -1,7 +1,9 @@
 package qbft
 
 import (
-	"github.com/stretchr/testify/require"
+	"encoding/json"
+	"fmt"
+	"github.com/golang/snappy"
 	"ssv-experiments/ssz_encoding/types"
 	"testing"
 )
@@ -70,61 +72,12 @@ var proposalMsg = &SignedMessage{
 	},
 }
 
-func TestHashRoot(t *testing.T) {
-	id := types.MessageID{0x1, 0x2, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x2, 0x3, 0x0, 0x0, 0x0, 0x0}
-	signed := &SignedMessage{
-		Message: Message{
-			ID:     id,
-			Height: 1,
-			Round:  2,
-			Input: types.ConsensusInput{
-				Duty: types.Duty{
-					Type:   types.BNRoleAttester,
-					PubKey: [48]byte{},
-				},
-			},
-			PreparedRound: 33,
-		},
-		Signature: [96]byte{},
-		Signers:   []uint64{1},
-		RoundChangeJustifications: []*SignedMessageHeader{
-			{
-				Message: MessageHeader{
-					ID:            id,
-					Height:        1,
-					Round:         2,
-					InputRoot:     [32]byte{},
-					PreparedRound: 33,
-				},
-				Signature: [96]byte{},
-				Signers:   []uint64{1},
-			},
-		},
-		ProposalJustifications: []*SignedMessageHeader{
-			{
-				Message: MessageHeader{
-					ID:            id,
-					Height:        1,
-					Round:         2,
-					InputRoot:     [32]byte{},
-					PreparedRound: 33,
-				},
-				Signature: [96]byte{},
-				Signers:   []uint64{1},
-			},
-		},
-	}
+func TestSizeComparison(t *testing.T) {
+	sszByts, _ := proposalMsg.MarshalSSZ()
+	sszSnappyByts := snappy.Encode([]byte{}, sszByts)
+	jsonByts, _ := json.Marshal(proposalMsg)
 
-	r, err := signed.Message.HashTreeRoot()
-	require.NoError(t, err)
-
-	signedHeader, err := signed.ToSignedMessageHeader()
-	require.NoError(t, err)
-	r2, err := signedHeader.Message.HashTreeRoot()
-	require.NoError(t, err)
-	require.EqualValues(t, r, r2)
-}
-
-func TestRoundChangeMsg(t *testing.T) {
-
+	fmt.Printf("ssz: %d\n", len(sszByts))
+	fmt.Printf("snappy: %d\n", len(sszSnappyByts))
+	fmt.Printf("json: %d\n", len(jsonByts))
 }

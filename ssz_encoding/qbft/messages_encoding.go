@@ -4,7 +4,6 @@ package qbft
 
 import (
 	ssz "github.com/ferranbt/fastssz"
-	"ssv-experiments/ssz_encoding/types"
 )
 
 // MarshalSSZ ssz marshals the Message object
