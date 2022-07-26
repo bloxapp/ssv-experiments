@@ -76,8 +76,10 @@ func TestSizeComparison(t *testing.T) {
 	sszByts, _ := proposalMsg.MarshalSSZ()
 	sszSnappyByts := snappy.Encode([]byte{}, sszByts)
 	jsonByts, _ := json.Marshal(proposalMsg)
+	jsonSnappyByts := snappy.Encode([]byte{}, jsonByts)
 
 	fmt.Printf("ssz: %d\n", len(sszByts))
-	fmt.Printf("snappy: %d\n", len(sszSnappyByts))
+	fmt.Printf("ssz snappy: %d\n", len(sszSnappyByts))
 	fmt.Printf("json: %d\n", len(jsonByts))
+	fmt.Printf("json snappy: %d\n", len(jsonSnappyByts))
 }
