@@ -62,9 +62,6 @@ func (msg *SignedMessage) ToSignedMessageHeader() (*SignedMessageHeader, error) 
 		Message:   header,
 		Signers:   msg.Signers,
 		Signature: msg.Signature,
-
-		RoundChangeJustifications: msg.RoundChangeJustifications,
-		ProposalJustifications:    msg.ProposalJustifications,
 	}, nil
 }
 
@@ -83,7 +80,4 @@ type SignedMessageHeader struct {
 	Message   MessageHeader
 	Signers   []uint64 `ssz-max:"13"`
 	Signature [96]byte `ssz-size:"96"`
-
-	RoundChangeJustifications []*SignedMessageHeader `ssz-max:"13"`
-	ProposalJustifications    []*SignedMessageHeader `ssz-max:"13"`
 }
