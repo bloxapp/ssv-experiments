@@ -7,19 +7,8 @@ import (
 
 //go:generate go run .../fastssz/sszgen --path . --include ../types
 
-type Type uint64
-
-const (
-	Proposal Type = iota
-	Prepare
-	Commit
-	RoundChange
-)
-
 // Message includes the full consensus input to be decided on, used for proposal and round-change messages
 type Message struct {
-	ID     types.MessageID `ssz-size:"52"`
-	Type   Type
 	Height uint64
 	Round  uint64
 	Input  types.ConsensusInput
@@ -33,8 +22,6 @@ func (msg Message) ToMessageHeader() (MessageHeader, error) {
 		return MessageHeader{}, errors.Wrap(err, "failed to get input root")
 	}
 	return MessageHeader{
-		ID:            msg.ID,
-		Type:          msg.Type,
 		Height:        msg.Height,
 		Round:         msg.Round,
 		InputRoot:     r,
@@ -67,8 +54,6 @@ func (msg *SignedMessage) ToSignedMessageHeader() (*SignedMessageHeader, error) 
 
 // MessageHeader includes just the root of the input to be decided on (to save space), used for prepare and commit messages
 type MessageHeader struct {
-	ID            types.MessageID `ssz-size:"52"`
-	Type          Type
 	Height        uint64
 	Round         uint64
 	InputRoot     [32]byte `ssz-size:"32"`
