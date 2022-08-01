@@ -2,16 +2,18 @@ package types
 
 import (
 	"encoding/binary"
+	"github.com/ethereum/go-ethereum/common"
 )
 
-const MessageIDSIze = 12
+const MessageIDSIze = 32
 
-type MessageID [12]byte
+type MessageID [32]byte
 
-var NoMessageID = [12]byte{}
+var NoMessageID = [32]byte{}
 
-func (msg MessageID) GetValidatorIndex() []byte {
-	return msg[0:8]
+func (msg MessageID) GetValidatorIndex() uint64 {
+	roleByts := msg[0:8]
+	return binary.LittleEndian.Uint64(roleByts)
 }
 
 func (msg MessageID) GetRoleType() BeaconRole {
@@ -19,7 +21,24 @@ func (msg MessageID) GetRoleType() BeaconRole {
 	return BeaconRole(binary.LittleEndian.Uint32(roleByts))
 }
 
-func NewMsgID(validatorIndex uint64, role BeaconRole) MessageID {
+func (msg MessageID) GetETHAddress() common.Address {
+	ret := common.Address{}
+	copy(ret[:], msg[0:20])
+	return ret
+}
+
+func (msg MessageID) GetDKGIndex() uint32 {
+	roleByts := msg[20:24]
+	return binary.LittleEndian.Uint32(roleByts)
+}
+
+func (msg MessageID) GetMsgType() MsgType {
+	ret := MsgType{}
+	copy(ret[:], msg[28:32])
+	return ret
+}
+
+func NewMsgIDValidator(validatorIndex uint64, role BeaconRole, msgType MsgType) MessageID {
 	indexByts := make([]byte, 8)
 	binary.LittleEndian.PutUint64(indexByts, validatorIndex)
 
@@ -27,7 +46,18 @@ func NewMsgID(validatorIndex uint64, role BeaconRole) MessageID {
 	binary.LittleEndian.PutUint32(roleByts, uint32(role))
 
 	ret := MessageID{}
-	copy(ret[:], append(indexByts, roleByts...))
+	copy(ret[:12], append(indexByts, roleByts...))
+	copy(ret[28:], msgType[:])
+	return ret
+}
+
+func NewMsgIDETHAddress(address common.Address, index uint32, msgType MsgType) MessageID {
+	roleByts := make([]byte, 4)
+	binary.LittleEndian.PutUint32(roleByts, index)
+
+	ret := MessageID{}
+	copy(ret[:24], append(address[:], roleByts...))
+	copy(ret[28:], msgType[:])
 	return ret
 }
 
