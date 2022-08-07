@@ -7,7 +7,7 @@ import (
 
 //go:generate go run .../fastssz/sszgen --path . --include ../types
 
-// Message includes the full consensus input to be decided on, used for proposal and round-change messages
+// Message includes the full consensus input to be decided on, used for decided, proposal and round-change messages
 type Message struct {
 	Height uint64
 	Round  uint64
@@ -52,7 +52,7 @@ func (msg *SignedMessage) ToSignedMessageHeader() (*SignedMessageHeader, error) 
 	}, nil
 }
 
-// MessageHeader includes just the root of the input to be decided on (to save space), used for prepare and commit messages
+// MessageHeader includes just the root of the input to be decided on (to save space), used for prepare, commit and justification messages
 type MessageHeader struct {
 	Height        uint64
 	Round         uint64
