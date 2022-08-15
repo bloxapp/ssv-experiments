@@ -1,12 +1,18 @@
 package ssv_state
 
-type QBFTInstance struct {
-}
+import (
+	"ssv-experiments/ssz_encoding/qbft"
+	"ssv-experiments/ssz_encoding/types"
+)
 
-func (i *QBFTInstance) IsDecided() bool {
-	panic("implement")
-}
-
-func (i *QBFTInstance) DecidedValue() []byte {
-	panic("implement")
+type QBFTState struct {
+	Share                           Share
+	ID                              types.MessageID
+	Round                           uint64
+	Height                          uint64
+	LastPreparedRound               uint64
+	LastPreparedValue               *types.ConsensusInput
+	ProposalAcceptedForCurrentRound *qbft.SignedMessage
+	Decided                         bool
+	DecidedValue                    *types.ConsensusInput
 }
