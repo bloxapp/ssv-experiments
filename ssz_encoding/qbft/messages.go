@@ -5,8 +5,6 @@ import (
 	"ssv-experiments/ssz_encoding/types"
 )
 
-//go:generate go run .../fastssz/sszgen --path . --include ../types
-
 // Message includes the full consensus input to be decided on, used for decided, proposal and round-change messages
 type Message struct {
 	Height uint64

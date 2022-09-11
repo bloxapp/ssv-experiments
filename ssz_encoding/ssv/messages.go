@@ -4,8 +4,6 @@ import (
 	"ssv-experiments/ssz_encoding/qbft"
 )
 
-//go:generate go run .../fastssz/sszgen --path . --include ../qbft,../types
-
 type PartialSigMsgType uint64
 
 const (
