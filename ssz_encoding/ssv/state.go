@@ -23,9 +23,4 @@ type State struct {
 	DecidedValue           *types.ConsensusInput
 	StartingDuty           types.Duty
 	Finished               bool
-
-	Share          types.Share
-	QBFTController qbft.Controller
-	BeaconNetwork  [4]byte `ssz-size:"4"`
-	BeaconRole     [4]byte `ssz-size:"4"`
 }
