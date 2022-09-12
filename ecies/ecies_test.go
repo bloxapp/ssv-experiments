@@ -2,6 +2,7 @@ package ecies
 
 import (
 	"crypto/rand"
+	"fmt"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/crypto/ecies"
 	"github.com/herumi/bls-eth-go-binary/bls"
@@ -49,4 +50,5 @@ func TestEncryptDecrypt(t *testing.T) {
 	plainDecrypted := DecryptECIES(ct, sk2Byts)
 
 	require.EqualValues(t, shareByts, plainDecrypted)
+	fmt.Printf("cipher text compressed L %d bytes\n", len(ct))
 }

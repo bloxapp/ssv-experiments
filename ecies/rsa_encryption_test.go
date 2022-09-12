@@ -2,7 +2,6 @@ package ecies
 
 import (
 	"fmt"
-	"github.com/golang/snappy"
 	"github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -17,6 +16,8 @@ func TestRSAEncryptDecrypt(t *testing.T) {
 	pk, err := PemToPublicKey(pkByts)
 	require.NoError(t, err)
 
+	fmt.Printf("pk L %d bytes\n", len(pkByts))
+
 	share := bls.SecretKey{}
 	share.SetByCSPRNG()
 	shareByts := share.Serialize()
@@ -26,7 +27,6 @@ func TestRSAEncryptDecrypt(t *testing.T) {
 
 	fmt.Printf("cipher text L %d bytes\n", len(ct))
 
-	compressed := snappy.Encode(nil, ct)
-	fmt.Printf("cipher text compressed L %d bytes\n", len(compressed))
+	fmt.Printf("cipher text compressed L %d bytes\n", len(ct))
 
 }
