@@ -2,6 +2,7 @@ package ecies
 
 import (
 	"fmt"
+	"github.com/golang/snappy"
 	"github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -24,4 +25,8 @@ func TestRSAEncryptDecrypt(t *testing.T) {
 	require.NoError(t, err)
 
 	fmt.Printf("cipher text L %d bytes\n", len(ct))
+
+	compressed := snappy.Encode(nil, ct)
+	fmt.Printf("cipher text compressed L %d bytes\n", len(compressed))
+
 }
