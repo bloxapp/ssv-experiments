@@ -1,30 +1,21 @@
 package qbft
 
 import (
-	"github.com/pkg/errors"
 	"ssv-experiments/ssz_encoding/types"
 )
+
+type Data struct {
+	Root   []byte `ssz-size:"32"`
+	Object *types.ConsensusInput
+}
 
 // Message includes the full consensus input to be decided on, used for decided, proposal and round-change messages
 type Message struct {
 	Height uint64
 	Round  uint64
-	Input  types.ConsensusInput
+	Input  Data
 	// PreparedRound an optional field used for round-change
 	PreparedRound uint64
-}
-
-func (msg Message) ToMessageHeader() (MessageHeader, error) {
-	r, err := msg.Input.HashTreeRoot()
-	if err != nil {
-		return MessageHeader{}, errors.Wrap(err, "failed to get input root")
-	}
-	return MessageHeader{
-		Height:        msg.Height,
-		Round:         msg.Round,
-		InputRoot:     r,
-		PreparedRound: msg.PreparedRound,
-	}, nil
 }
 
 // SignedMessage includes a signature over Message AND optional justification fields (not signed over)
@@ -33,34 +24,22 @@ type SignedMessage struct {
 	Signers   []uint64 `ssz-max:"13"`
 	Signature [96]byte `ssz-size:"96"`
 
-	RoundChangeJustifications []*SignedMessageHeader `ssz-max:"13"`
-	ProposalJustifications    []*SignedMessageHeader `ssz-max:"13"`
+	Justifications *Justifications
 }
 
-func (msg *SignedMessage) ToSignedMessageHeader() (*SignedMessageHeader, error) {
-	header, err := msg.Message.ToMessageHeader()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to convert to header")
-	}
-
-	return &SignedMessageHeader{
-		Message:   header,
-		Signers:   msg.Signers,
-		Signature: msg.Signature,
-	}, nil
+type Justifications struct {
+	RoundChangeJustifications [][]byte `ssz-max:"13,1024"`
+	ProposalJustifications    [][]byte `ssz-max:"13,1024"`
 }
 
-// MessageHeader includes just the root of the input to be decided on (to save space), used for prepare, commit and justification messages
-type MessageHeader struct {
-	Height        uint64
-	Round         uint64
-	InputRoot     [32]byte `ssz-size:"32"`
-	PreparedRound uint64
+func (j *Justifications) GetRoundChangeJustifications() ([]*SignedMessage, error) {
+	return j.toSignedMessages(j.RoundChangeJustifications)
 }
 
-// SignedMessageHeader includes a signature over MessageHeader
-type SignedMessageHeader struct {
-	Message   MessageHeader
-	Signers   []uint64 `ssz-max:"13"`
-	Signature [96]byte `ssz-size:"96"`
+func (j *Justifications) GetProposalJustifications() ([]*SignedMessage, error) {
+	return j.toSignedMessages(j.ProposalJustifications)
+}
+
+func (j *Justifications) toSignedMessages(data [][]byte) ([]*SignedMessage, error) {
+	panic("implement")
 }
