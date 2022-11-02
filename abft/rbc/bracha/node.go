@@ -9,7 +9,7 @@ type Node struct {
 
 	Malicious bool
 
-	id         int
+	ID         int
 	echo, vote bool
 }
 
@@ -20,7 +20,7 @@ func newNode(n, f, id int, malicious bool) *Node {
 		F:         f,
 		EchoMsgs:  map[int][]byte{},
 		VoteMsgs:  map[int][]byte{},
-		id:        id,
+		ID:        id,
 		echo:      true,
 		vote:      true,
 	}
@@ -31,9 +31,9 @@ func (b *Node) FromLeader(fromID int, data []byte) {
 		return
 	}
 	if b.echo {
-		b.ReceiveEcho(b.id, data)
+		b.ReceiveEcho(b.ID, data)
 		for _, n := range b.Nodes {
-			n.ReceiveEcho(b.id, data)
+			n.ReceiveEcho(b.ID, data)
 		}
 		b.echo = false
 	}
@@ -42,9 +42,9 @@ func (b *Node) FromLeader(fromID int, data []byte) {
 func (b *Node) ReceiveEcho(fromID int, data []byte) {
 	b.EchoMsgs[fromID] = data
 	if len(b.EchoMsgs) >= b.N-b.F && b.vote {
-		b.ReceiveVote(b.id, data)
+		b.ReceiveVote(b.ID, data)
 		for _, n := range b.Nodes {
-			n.ReceiveVote(b.id, data)
+			n.ReceiveVote(b.ID, data)
 		}
 		b.vote = false
 	}
@@ -53,9 +53,9 @@ func (b *Node) ReceiveEcho(fromID int, data []byte) {
 func (b *Node) ReceiveVote(fromID int, data []byte) {
 	b.VoteMsgs[fromID] = data
 	//if len(b.VoteMsgs) >= b.F+1 && b.vote {
-	//	b.ReceiveVote(b.id, data)
+	//	b.ReceiveVote(b.ID, data)
 	//	for _, n := range b.Nodes {
-	//		n.ReceiveVote(b.id, data)
+	//		n.ReceiveVote(b.ID, data)
 	//	}
 	//	b.vote = false
 	//}
