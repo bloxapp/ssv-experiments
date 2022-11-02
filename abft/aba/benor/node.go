@@ -42,7 +42,7 @@ func (n *Node) Start(value bool) {
 	if n.Decided {
 		return
 	}
-	
+
 	n.Value = value
 	for _, node := range n.Nodes {
 		node.Echo1(n.ID, n.Round, value)

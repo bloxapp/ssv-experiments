@@ -1,5 +1,6 @@
 package bracha
 
+// Broadcaster is based on Bracha's reliable broadcasting protocol https://core.ac.uk/download/pdf/82523202.pdf
 type Broadcaster struct {
 	Nodes map[int]*Node
 }
