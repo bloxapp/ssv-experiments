@@ -30,11 +30,11 @@ func newNode(n, f, id int, malicious bool) *Node {
 		Echo1Msgs:    map[int]map[bool][]int{},
 		Echo2Msgs:    map[int]map[bool][]int{},
 		Echo2BotMsgs: map[int][]int{},
-		Round:        1,
+		Round:        0,
 	}
 }
 
-func (n *Node) Start(value bool) {
+func (n *Node) Start(round int, value bool) {
 	if n.Malicious {
 		return
 	}
@@ -43,6 +43,12 @@ func (n *Node) Start(value bool) {
 		return
 	}
 
+	// prevents re-starting the same round over and over again
+	if round <= n.Round {
+		return
+	}
+
+	n.Round = round
 	n.Value = value
 	for _, node := range n.Nodes {
 		node.Echo1(n.ID, n.Round, value)
@@ -65,17 +71,17 @@ func (n *Node) Echo1(id int, round int, value bool) {
 	echo1MsgCnt := len(n.Echo1Msgs[round][false]) + len(n.Echo1Msgs[round][true])
 
 	if echo1MsgCnt >= n.N-n.F {
-		if len(n.Echo1Msgs[round][false]) >= (n.N+n.F)/2 {
+		if len(n.Echo1Msgs[round][false]) > (n.N+n.F)/2 {
 			for _, node := range n.Nodes {
-				node.Echo2D(n.ID, n.Round, false)
+				node.Echo2D(n.ID, round, false)
 			}
-		} else if len(n.Echo1Msgs[round][true]) >= (n.N+n.F)/2 {
+		} else if len(n.Echo1Msgs[round][true]) > (n.N+n.F)/2 {
 			for _, node := range n.Nodes {
-				node.Echo2D(n.ID, n.Round, true)
+				node.Echo2D(n.ID, round, true)
 			}
 		} else {
 			for _, node := range n.Nodes {
-				node.Echo2Bot(n.ID, n.Round)
+				node.Echo2Bot(n.ID, round)
 			}
 		}
 	}
@@ -94,6 +100,23 @@ func (n *Node) Echo2D(id int, round int, value bool) {
 	}
 	n.Echo2Msgs[round][value] = append(n.Echo2Msgs[round][value], id)
 
+	n.echo2Process(round)
+}
+
+func (n *Node) Echo2Bot(id int, round int) {
+	if n.Malicious {
+		return
+	}
+
+	if n.Echo2BotMsgs[round] == nil {
+		n.Echo2BotMsgs[round] = []int{}
+	}
+	n.Echo2BotMsgs[round] = append(n.Echo2BotMsgs[round], id)
+
+	n.echo2Process(round)
+}
+
+func (n *Node) echo2Process(round int) {
 	if n.cntEcho2Msgs(round) >= n.N-n.F {
 		if len(n.Echo2Msgs[round][false]) >= n.F+1 {
 			n.Value = false
@@ -109,24 +132,7 @@ func (n *Node) Echo2D(id int, round int, value bool) {
 			n.Value = RandBool()
 		}
 
-		n.Round++
-		n.Start(n.Value)
-	}
-
-}
-
-func (n *Node) Echo2Bot(id int, round int) {
-	if n.Malicious {
-		return
-	}
-
-	if n.Echo2BotMsgs[round] == nil {
-		n.Echo2BotMsgs[round] = []int{}
-	}
-	n.Echo2BotMsgs[round] = append(n.Echo2BotMsgs[round], id)
-
-	if n.cntEcho2Msgs(round) >= n.N-n.F {
-
+		n.Start(n.Round+1, n.Value)
 	}
 }
 
