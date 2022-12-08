@@ -18,9 +18,10 @@ const (
 )
 
 type PartialSignature struct {
-	Slot          uint64
-	Signature     [96]byte `ssz-size:"96"`
-	SigningRoot   [32]byte `ssz-size:"32"`
+	Slot        uint64
+	Signature   [96]byte `ssz-size:"96"`
+	SigningRoot [32]byte `ssz-size:"32"`
+	// Justification is an optional param, the decided message post consensus
 	Justification *qbft.SignedMessage
 }
 

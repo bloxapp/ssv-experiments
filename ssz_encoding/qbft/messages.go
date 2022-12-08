@@ -1,19 +1,16 @@
 package qbft
 
 import (
+	"bytes"
+	"github.com/pkg/errors"
 	"ssv-experiments/ssz_encoding/types"
 )
-
-type Data struct {
-	Root   []byte `ssz-size:"32"`
-	Object *types.ConsensusInput
-}
 
 // Message includes the full consensus input to be decided on, used for decided, proposal and round-change messages
 type Message struct {
 	Height uint64
 	Round  uint64
-	Input  Data
+	Root   []byte `ssz-size:"32"`
 	// PreparedRound an optional field used for round-change
 	PreparedRound uint64
 }
@@ -25,6 +22,20 @@ type SignedMessage struct {
 	Signature [96]byte `ssz-size:"96"`
 
 	Justifications *Justifications
+	Object         *types.ConsensusInput
+}
+
+func (msg *SignedMessage) Validate() error {
+	if msg.Object != nil {
+		r, err := msg.Object.HashTreeRoot()
+		if err != nil {
+			return errors.Wrap(err, "could not get object root")
+		}
+		if !bytes.Equal(msg.Message.Root[:], r[:]) {
+			return errors.Wrap(err, "object root not equal to message root")
+		}
+	}
+	return nil
 }
 
 type Justifications struct {
@@ -41,5 +52,13 @@ func (j *Justifications) GetProposalJustifications() ([]*SignedMessage, error) {
 }
 
 func (j *Justifications) toSignedMessages(data [][]byte) ([]*SignedMessage, error) {
-	panic("implement")
+	ret := make([]*SignedMessage, len(data))
+	for i, byts := range data {
+		msg := &SignedMessage{}
+		if err := msg.UnmarshalSSZ(byts); err != nil {
+			return nil, errors.Wrap(err, "could not unmarshal signed message")
+		}
+		ret[i] = msg
+	}
+	return ret, nil
 }
