@@ -6,7 +6,7 @@ require (
 	github.com/ethereum/go-ethereum v1.10.21
 	github.com/ferranbt/fastssz v0.1.2
 	github.com/golang/snappy v0.0.4
-	github.com/herumi/bls-eth-go-binary v0.0.0-20220509081320-2d8ab06de53c
+	github.com/herumi/bls-eth-go-binary v1.28.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.0
 )
