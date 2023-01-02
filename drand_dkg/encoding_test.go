@@ -39,11 +39,11 @@ func TestEncodeFromDrand(t *testing.T) {
 	_ = bls.Init(bls.BLS12_381)
 	_ = bls.SetETHmode(bls.EthModeDraft07)
 
-	sk1 := skFromString(t, "7332e60a364cc722dc6b4f992f94e97ca6a458c76afe6add26f38040e4fb32e6")
-	sk2 := skFromString(t, "58004daa4654b306f4a39f8cdc42c8b7d1ad25b40837820f451e0802b98149db")
-	sk3 := skFromString(t, "6d0dc2ef489735ba5c9515880458121d83881688908bd577562a8ce8406ce823")
-	sk4 := skFromString(t, "3e6d9e861376d1f4e105d9829e32eda86877874203fd09165a190ef279be0dbd")
-	validatorSK := skFromString(t, "4ab7e4bbeee1f4c5e0b24da4f4ac9c66aeb00bbfb8e233e1fbaaf5a3c2daa343")
+	sk1 := skFromString(t, "3139da31de82f972f5422c1aa6b6596711084edc13ed8efb4afbac3d4f050beb")
+	sk2 := skFromString(t, "5b7bb518af1b91923ada8d2347a4a6b8347a272d50c0d1f076458a7720c6caa4")
+	sk3 := skFromString(t, "1c4cc57a448c8514f4a922724161a77db8164c6caaf36be290814eabcbadfc03")
+	sk4 := skFromString(t, "5b8859fcf210ce8b89219c17a7310bc2435806a0228214cf99aef8d94fbaa00a")
+	validatorSK := skFromString(t, "1174dc18fc6039ff5719d7606838978fa17e677bf477ff020ea3b3fd5668bfd9")
 	//validatorPK := "8eac72c83c7e416fab9cc1933c5b73702d4fbf83819738d12af33331ed85afb3df99f43502697861919e7c40daa2e93d"
 
 	s := bls.SecretKey{}
