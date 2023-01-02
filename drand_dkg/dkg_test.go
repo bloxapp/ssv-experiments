@@ -1,6 +1,7 @@
 package drand_dkg
 
 import (
+	"encoding/hex"
 	"fmt"
 	bls "github.com/drand/kyber-bls12381"
 	"github.com/drand/kyber/share/dkg"
@@ -28,6 +29,11 @@ var TestNodes = func() []*Node {
 	}
 }()
 
+var TestWithdrawalCredentials = func() []byte {
+	s := "005b55a6c968852666b132a80f53712e5097b0fca86301a16992e695a8e86f16"
+	ret, _ := hex.DecodeString(s)
+	return ret
+}()
 var TestDrandNodes = func() []dkg.Node {
 	return []dkg.Node{
 		{
@@ -105,29 +111,76 @@ func TestDKGFull(t *testing.T) {
 		}
 	}
 
-	if len(justifs) == 0 {
-		require.NotEmpty(t, results)
-
-		var sks []bls3.SecretKey
-		for i, res := range results {
-			sk, err := resultToShareSecretKey(res)
-			require.NoError(t, err)
-			fmt.Printf("Index (%d): %x\n", i+1, sk.Serialize())
-			sks = append(sks, *sk)
-		}
-
-		valSK := reconstructSK(t, sks)
-		valPK, err := resultsToValidatorPK(results, TestSuite.G1().(dkg.Suite))
-		require.NoError(t, err)
-		require.EqualValues(t, valPK.Serialize(), valSK.GetPublicKey().Serialize())
-
-		fmt.Printf("Validator SK: %x\nValidator PK: %x\n", valSK.Serialize(), valPK.Serialize())
-	} else {
+	if len(justifs) > 0 {
 		for _, n := range TestNodes {
 			res, err := n.drand.ProcessJustifications(justifs)
 			require.NoError(t, err)
 			require.NotNil(t, res)
 			results = append(results, res)
 		}
+
+		panic("implement")
+	}
+
+	require.NotEmpty(t, results)
+
+	// print and collect individual share SKs
+	var sks []bls3.SecretKey
+	for i, res := range results {
+		sk, err := resultToShareSecretKey(res)
+		require.NoError(t, err)
+		TestNodes[i].GenerateShare = sk
+		fmt.Printf("Index (%d): %x\n", i+1, sk.Serialize())
+		sks = append(sks, *sk)
+	}
+
+	// reconstruct from shares and verify
+	valSK := reconstructSK(t, sks)
+	valPK, err := resultsToValidatorPK(results, TestSuite.G1().(dkg.Suite))
+	require.NoError(t, err)
+	require.EqualValues(t, valPK.Serialize(), valSK.GetPublicKey().Serialize())
+	fmt.Printf("Validator SK: %x\nValidator PK: %x\n", valSK.Serialize(), valPK.Serialize())
+
+	// encrypt shares
+	var encryptedShares [][]byte
+	for _, n := range TestNodes {
+		cypher, err := n.EncryptShare()
+		require.NoError(t, err)
+		encryptedShares = append(encryptedShares, cypher)
+	}
+
+	// generate deposit data sigs
+	root, _, err := types.GenerateETHDepositData(
+		valPK.Serialize(),
+		TestWithdrawalCredentials,
+		types.GenesisForkVersion,
+		types.DomainDeposit,
+	)
+	require.NoError(t, err)
+	var depositPartialSigs []*bls3.Sign
+	for _, n := range TestNodes {
+		depositPartialSigs = append(depositPartialSigs, n.GenerateShare.SignByte(root))
+	}
+
+	// reconstruct deposit sig and verify
+	sig, err := reconstructSignatures(map[int][]byte{
+		1: depositPartialSigs[0].Serialize(),
+		2: depositPartialSigs[1].Serialize(),
+		3: depositPartialSigs[2].Serialize(),
+		4: depositPartialSigs[3].Serialize(),
+	})
+	require.NoError(t, err)
+	require.True(t, sig.VerifyByte(valPK, root))
+
+	// construct output struct
+	var output []*Output
+	for i, _ := range TestNodes {
+		output = append(output, &Output{
+			Nonce:                       nonce,
+			EncryptedShare:              encryptedShares[i],
+			SharePK:                     TestNodes[i].GenerateShare.GetPublicKey().Serialize(),
+			ValidatorPK:                 valPK.Serialize(),
+			DepositDataPartialSignature: depositPartialSigs[i].Serialize(),
+		})
 	}
 }
