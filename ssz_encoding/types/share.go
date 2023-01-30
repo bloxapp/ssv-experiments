@@ -12,5 +12,6 @@ type Share struct {
 	Committee             []*Operator `ssz-max:"13"`
 	Quorum, PartialQuorum uint64
 	DomainType            DomainType `ssz-size:"4"`
+	FeeRecipientAddress   [20]byte   `ssz-size:"20"`
 	Graffiti              []byte     `ssz-size:"32"`
 }

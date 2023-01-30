@@ -1,32 +1,35 @@
-package qbft
+package other
 
-import "ssv-experiments/ssz_encoding/types"
+import (
+	"ssv-experiments/ssz_encoding/qbft"
+	"ssv-experiments/ssz_encoding/types"
+)
 
 // MsgContainer holds all accepted messages
-type MsgContainer []*SignedMessage
+type MsgContainer []*qbft.SignedMessage
 
-func (c MsgContainer) PerRound(round uint64) []SignedMessage {
+func (c MsgContainer) PerRound(round uint64) []qbft.SignedMessage {
 	panic("implement")
 }
 
-func (c MsgContainer) PerRoundAndValue(round uint64, value []byte) []SignedMessage {
+func (c MsgContainer) PerRoundAndValue(round uint64, value []byte) []qbft.SignedMessage {
 	panic("implement")
 }
 
-func (c MsgContainer) LongestUniqueSignersForRoundAndValue(round uint64, value []byte) []SignedMessage {
+func (c MsgContainer) LongestUniqueSignersForRoundAndValue(round uint64, value []byte) []qbft.SignedMessage {
 	panic("implement")
 }
 
-type State struct {
+type StateQBFT struct {
 	Share                           types.Share
 	ID                              [32]byte `ssz-size:"32"`
 	Round                           uint64
 	Height                          uint64
 	LastPreparedRound               uint64
-	LastPreparedValue               *types.ConsensusInput
-	ProposalAcceptedForCurrentRound *SignedMessage
+	LastPreparedValue               *types.ConsensusData
+	ProposalAcceptedForCurrentRound *qbft.SignedMessage
 	Decided                         bool
-	DecidedValue                    *types.ConsensusInput
+	DecidedValue                    *types.ConsensusData
 
 	ProposeContainer     MsgContainer `ssz-max:"256"` // TODO - why 256 max per instance?
 	PrepareContainer     MsgContainer `ssz-max:"256"`
@@ -35,8 +38,8 @@ type State struct {
 }
 
 type Instance struct {
-	State      State
-	StartValue types.ConsensusInput
+	State      StateQBFT
+	StartValue types.ConsensusData
 }
 
 // FutureMsgContainer holds for each operator (by order in the share) the highest height msg received and validated.

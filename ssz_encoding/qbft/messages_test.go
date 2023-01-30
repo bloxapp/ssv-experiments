@@ -21,7 +21,7 @@ var roundChangeMsg = &SignedMessage{
 	Message: Message{
 		Height: 2,
 		Round:  2,
-		Input: types.ConsensusInput{ // input is used as prepared value
+		Input: types.ConsensusData{ // input is used as prepared value
 			Duty: types.Duty{
 				Type:   types.BNRoleAttester,
 				PubKey: [48]byte{},
@@ -45,7 +45,7 @@ var proposalMsg = &SignedMessage{
 	Message: Message{
 		Height: 2,
 		Round:  2,
-		Input: types.ConsensusInput{ // input is used as prepared value
+		Input: types.ConsensusData{ // input is used as prepared value
 			Duty: types.Duty{
 				Type:   types.BNRoleAttester,
 				PubKey: [48]byte{},
