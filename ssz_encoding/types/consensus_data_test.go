@@ -109,20 +109,31 @@ var TestingBeaconBlock = &bellatrix.BeaconBlock{
 }
 
 var attestationConsensusData = func() *ConsensusData {
-	ret := NewConsensusData(TestingAttesterDuty)
-	ret.AttestationData = AttestationData
-	return ret
+	byts, _ := AttestationData.MarshalSSZ()
+	return &ConsensusData{
+		Duty:    TestingAttesterDuty,
+		DataSSZ: byts,
+	}
 }()
 
 var proposerConsensusData = func() *ConsensusData {
-	ret := NewConsensusData(TestingAttesterDuty)
-	ret.BlockData = TestingBeaconBlock
-	return ret
+	byts, _ := TestingBeaconBlock.MarshalSSZ()
+	return &ConsensusData{
+		Duty:    TestingAttesterDuty,
+		DataSSZ: byts,
+	}
 }()
 
 func BenchmarkMarshaling(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		json.Marshal(attestationConsensusData)
+		byts, err := json.Marshal(attestationConsensusData)
+		require.NoError(b, err)
+
+		c := &ConsensusData{}
+		require.NoError(b, json.Unmarshal(byts, &c))
+
+		_, err = c.GetAttestationData()
+		require.NoError(b, err)
 	}
 
 	byts, err := json.Marshal(attestationConsensusData)
@@ -132,7 +143,14 @@ func BenchmarkMarshaling(b *testing.B) {
 
 func BenchmarkSSZMarshaling(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		attestationConsensusData.MarshalSSZ()
+		byts, err := attestationConsensusData.MarshalSSZ()
+		require.NoError(b, err)
+
+		c := &ConsensusData{}
+		require.NoError(b, c.UnmarshalSSZ(byts))
+
+		_, err = c.GetAttestationData()
+		require.NoError(b, err)
 	}
 
 	byts, err := attestationConsensusData.MarshalSSZ()
@@ -142,9 +160,14 @@ func BenchmarkSSZMarshaling(b *testing.B) {
 
 func BenchmarkBlockMarshaling(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		byts, _ := json.Marshal(proposerConsensusData)
-		n := &ConsensusData{}
-		require.NoError(b, json.Unmarshal(byts, &n))
+		byts, err := json.Marshal(proposerConsensusData)
+		require.NoError(b, err)
+
+		c := &ConsensusData{}
+		require.NoError(b, json.Unmarshal(byts, &c))
+
+		_, err = c.GetBlockData()
+		require.NoError(b, err)
 	}
 
 	byts, err := json.Marshal(proposerConsensusData)
@@ -154,7 +177,14 @@ func BenchmarkBlockMarshaling(b *testing.B) {
 
 func BenchmarkSonicBlockMarshaling(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		sonic.Marshal(proposerConsensusData)
+		byts, err := sonic.Marshal(proposerConsensusData)
+		require.NoError(b, err)
+
+		c := &ConsensusData{}
+		require.NoError(b, sonic.Unmarshal(byts, &c))
+
+		_, err = c.GetBlockData()
+		require.NoError(b, err)
 	}
 
 	byts, err := sonic.Marshal(proposerConsensusData)
@@ -164,9 +194,14 @@ func BenchmarkSonicBlockMarshaling(b *testing.B) {
 
 func BenchmarkBlockSSZMarshaling(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		byts, _ := proposerConsensusData.MarshalSSZ()
-		n := &ConsensusData{}
-		require.NoError(b, n.UnmarshalSSZ(byts))
+		byts, err := proposerConsensusData.MarshalSSZ()
+		require.NoError(b, err)
+
+		c := &ConsensusData{}
+		require.NoError(b, c.UnmarshalSSZ(byts))
+
+		_, err = c.GetBlockData()
+		require.NoError(b, err)
 	}
 
 	byts, err := proposerConsensusData.MarshalSSZ()
